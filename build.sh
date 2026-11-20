@@ -13,10 +13,11 @@ python manage.py collectstatic --noinput --verbosity=2
 
 echo "Verifying static files..."
 if [ -d "staticfiles" ]; then
-    echo "staticfiles directory exists"
-    ls -la staticfiles/
+    echo "✓ staticfiles directory exists"
+    echo "Contents:"
+    find staticfiles -type f | head -20
 else
-    echo "ERROR: staticfiles directory not created!"
+    echo "✗ ERROR: staticfiles directory not created!"
     exit 1
 fi
 
