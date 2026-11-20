@@ -1,0 +1,281 @@
+{% extends "web/base.html" %}
+{% load static %}
+
+{% block nav %}
+  <a href="{% url 'tutmesh' %}">TutMesh</a>
+  <button type="button" class="linklike" id="historyBtn">History</button>
+{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <h1>Are you ready for this job?</h1>
+  <p>Upload your resume and add a job posting. You'll get an honest fit score with the evidence behind it, plus a free learning roadmap for anything you're missing.</p>
+  <div class="status-row" id="capabilities" aria-live="polite"></div>
+</section>
+
+<ol class="stepper" aria-label="Progress">
+  <li data-step="1" class="active">Resume</li>
+  <li data-step="2">Job</li>
+  <li data-step="3">Results</li>
+</ol>
+
+<div class="grid-2">
+  <!-- STEP 1: RESUME -->
+  <section class="card" id="resumeCard" aria-labelledby="resumeTitle">
+    <header class="card-head">
+      <h2 id="resumeTitle"><span class="num">1</span> Your profile</h2>
+      <div class="seg" role="tablist" aria-label="Profile source">
+        <button role="tab" aria-selected="true" data-profile-mode="resume">Resume</button>
+        <button role="tab" aria-selected="false" data-profile-mode="github"><span class="gh-mark small" aria-hidden="true"></span>GitHub</button>
+      </div>
+    </header>
+
+    <div data-profile-panel="resume">
+    <div>
+      <label class="dropzone" id="resumeDrop" tabindex="0">
+        <input type="file" id="resumeFile" accept=".pdf,.docx,.txt,.md" hidden>
+        <strong>Drop your resume here</strong>
+        <span>or click to browse (PDF, DOCX or TXT, up to 5 MB)</span>
+        <span class="filename" id="resumeFileName"></span>
+      </label>
+    </div>
+    <p class="auto-status" id="resumeStatus" role="status" aria-live="polite" hidden></p>
+
+    <div id="profileBox" class="extracted" hidden>
+      <div class="extracted-head">
+        <h3>What we found</h3>
+        <span class="badge" id="profileSource"></span>
+      </div>
+      <div class="fields">
+        <label>Years of experience <input type="number" id="pYears" min="0" max="50"></label>
+        <label>Level
+          <select id="pSeniority">
+            <option value="unknown">Unknown</option><option value="intern">Intern</option><option value="junior">Junior</option>
+            <option value="mid">Mid</option><option value="senior">Senior</option><option value="lead">Lead / Principal</option>
+          </select>
+        </label>
+        <label>Highest degree
+          <select id="pEducation">
+            <option value="">None / not stated</option><option value="associate">Associate / Diploma</option>
+            <option value="bachelor">Bachelor's</option><option value="master">Master's</option><option value="phd">PhD</option>
+          </select>
+        </label>
+      </div>
+      <p class="hint">Click a skill to switch it between <span class="chip applied mini">used in work</span> and <span class="chip listed mini">only listed</span>. Remove anything that's wrong.</p>
+      <div class="chips" id="profileChips"></div>
+      <form class="add-chip" data-target="profile">
+        <input type="text" placeholder="Add a skill you have…" aria-label="Add a skill you have" maxlength="80">
+        <button class="btn small" type="submit">Add</button>
+      </form>
+    </div>
+    </div>
+
+    <div class="github-block" data-profile-panel="github" hidden>
+      <div class="github-head">
+        <span class="gh-mark" aria-hidden="true"></span>
+        <div>
+          <h3>GitHub <span class="badge">optional</span></h3>
+          <p class="hint">We read your <strong>public repositories</strong> (languages, dependencies, tooling), not your bio, then cross-check them against your resume and the job.</p>
+        </div>
+      </div>
+      <div class="gh-auth" id="ghAuth" aria-live="polite"></div>
+      <form id="githubForm" class="inline-form">
+        <input type="text" id="githubUser" placeholder="github.com/your-username" aria-label="GitHub username or profile URL" maxlength="120" autocomplete="off">
+        <button class="btn" type="submit" id="githubBtn">Analyze GitHub</button>
+      </form>
+      <div id="githubBox" hidden>
+        <div class="gh-summary" id="ghSummary"></div>
+        <div class="lang-bar" id="ghLangBar" aria-label="Languages by code volume"></div>
+        <div class="lang-legend" id="ghLangLegend"></div>
+        <p class="hint">Skills evidenced in your code. The number is the estimated level from repo count, code volume and recency.</p>
+        <div class="chips" id="githubChips"></div>
+        <button class="linklike danger-link" id="githubClear" type="button">Remove GitHub data</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- STEP 2: JOB -->
+  <section class="card" id="jobCard" aria-labelledby="jobTitle">
+    <header class="card-head">
+      <h2 id="jobTitle"><span class="num">2</span> The job</h2>
+      <div class="seg" role="tablist" aria-label="Job input">
+        <button role="tab" aria-selected="true" data-job-mode="url">Job URL</button>
+        <button role="tab" aria-selected="false" data-job-mode="text">Paste text</button>
+        <button role="tab" aria-selected="false" data-job-mode="image">Image</button>
+      </div>
+    </header>
+
+    <div data-job-panel="url">
+      <form id="urlForm" class="inline-form">
+        <input type="url" id="jobUrl" placeholder="https://company.com/careers/job-123" aria-label="Job posting URL" required>
+        <button class="btn" type="submit" id="fetchBtn">Fetch</button>
+      </form>
+      <p class="hint">Public pages only. Postings behind a login (e.g. LinkedIn) can't be read. Paste the text or a screenshot instead.</p>
+    </div>
+    <div data-job-panel="image" hidden>
+      <label class="dropzone" id="imageDrop" tabindex="0">
+        <input type="file" id="jobImage" accept="image/*" hidden>
+        <strong>Drop a screenshot, or press Ctrl+V to paste one</strong>
+        <span>Text is read <em>on your device</em>. The image is never uploaded.</span>
+        <span class="filename" id="ocrStatus"></span>
+      </label>
+      <div class="progress" id="ocrProgress" hidden><div></div></div>
+    </div>
+    <div data-job-panel="text" class="job-text-panel">
+      <textarea id="jobText" rows="10" placeholder="Paste the job description… Requirements are extracted automatically (fetched or scanned text appears here too)."></textarea>
+    </div>
+    <p class="auto-status" id="jobStatus" role="status" aria-live="polite" hidden></p>
+
+    <div id="jobBox" class="extracted" hidden>
+      <div class="extracted-head">
+        <h3 id="jobHeading">Requirements</h3>
+        <span class="badge" id="jobSource"></span>
+      </div>
+      <div class="fields">
+        <label>Years required <input type="number" id="jYears" min="0" max="30"></label>
+        <label>Level
+          <select id="jSeniority">
+            <option value="unknown">Unknown</option><option value="intern">Intern</option><option value="junior">Junior</option>
+            <option value="mid">Mid</option><option value="senior">Senior</option><option value="lead">Lead / Principal</option>
+          </select>
+        </label>
+        <label>Degree
+          <select id="jEducation">
+            <option value="">Not required</option><option value="associate">Associate / Diploma</option>
+            <option value="bachelor">Bachelor's</option><option value="master">Master's</option><option value="phd">PhD</option>
+          </select>
+        </label>
+      </div>
+      <h4>Required</h4>
+      <div class="chips" id="requiredChips"></div>
+      <form class="add-chip" data-target="required">
+        <input type="text" placeholder="Add a required skill…" aria-label="Add a required skill" maxlength="80">
+        <button class="btn small" type="submit">Add</button>
+      </form>
+      <h4>Nice to have</h4>
+      <div class="chips" id="preferredChips"></div>
+      <form class="add-chip" data-target="preferred">
+        <input type="text" placeholder="Add a nice-to-have…" aria-label="Add a nice-to-have skill" maxlength="80">
+        <button class="btn small" type="submit">Add</button>
+      </form>
+      <div id="hardReqs" class="callout warn" hidden></div>
+    </div>
+  </section>
+</div>
+
+<!-- STEP 3: ANALYZE -->
+<section class="card analyze-bar" aria-label="Analyze">
+  <div class="study">
+    <div class="study-value" aria-hidden="true"><b id="hoursVal">10</b><span>h / week</span></div>
+    <div class="study-body">
+      <div class="study-head">
+        <label class="study-label" for="hours">Study time</label>
+        <span class="study-pace" id="hoursPace"></span>
+      </div>
+      <input type="range" class="study-range" id="hours" min="2" max="40" step="1" value="10">
+      <div class="study-scale" aria-hidden="true"><span>2 h</span><span>40 h</span></div>
+    </div>
+  </div>
+  <label class="switch compact quiet">
+    <input type="checkbox" id="includePref" checked>
+    <span class="switch-track" aria-hidden="true"><span class="switch-thumb"></span></span>
+    <span class="switch-text"><b>Nice-to-haves</b><small>Include in roadmap</small></span>
+  </label>
+  <button class="btn primary large" id="analyzeBtn" disabled>Analyze my fit</button>
+</section>
+
+<div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+<!-- RESULTS -->
+<section id="results" hidden aria-live="polite">
+  <div class="card result-hero">
+    <div class="ring-wrap">
+      <svg viewBox="0 0 120 120" class="ring" aria-hidden="true">
+        <circle cx="60" cy="60" r="52" class="ring-bg"/>
+        <circle cx="60" cy="60" r="52" class="ring-fg" id="ringFg"/>
+      </svg>
+      <div class="ring-label"><span id="scoreNum">0</span><small>/100</small></div>
+    </div>
+    <div class="verdict">
+      <span class="verdict-pill" id="verdictPill"></span>
+      <h2 id="resultTitle"></h2>
+      <p id="verdictMsg"></p>
+      <ul class="caps" id="capsList"></ul>
+      <div class="result-actions">
+        <button class="btn" id="saveBtn">Save to history</button>
+        <button class="btn" id="printBtn">Print report</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <h3>Score breakdown</h3>
+      <div id="breakdown"></div>
+      <p class="hint">This score is an estimate based on the evidence in your resume. It isn't a hiring decision.</p>
+    </div>
+    <div class="card">
+      <h3>Quick wins</h3>
+      <ul id="quickWins" class="bullets"></ul>
+      <div id="hardReqResult" class="callout warn" hidden></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="skills-head">
+      <div>
+        <h3>Skill by skill</h3>
+        <p class="hint" id="levelHint"></p>
+      </div>
+      <div class="readiness" id="readiness"></div>
+    </div>
+    <div class="level-legend">
+      <span><i class="lg-you"></i>Your level</span>
+      <span><i class="lg-req"></i>Required for this role</span>
+      <span><i class="lg-src">R</i>Resume</span>
+      <span><i class="lg-src gh">G</i>GitHub</span>
+    </div>
+    <div id="crossCheck" class="cross-check" hidden></div>
+    <div id="skillLevels" class="skill-levels"></div>
+  </div>
+
+  <div class="card roadmap-card" id="roadmapCard">
+    <div class="roadmap-head">
+      <div>
+        <span class="eyebrow">Personalised plan</span>
+        <h3>Your learning roadmap</h3>
+        <p id="roadmapSummary"></p>
+      </div>
+      <div class="export" id="exportMenu">
+        <span class="export-label">Export or track your progress</span>
+        <div class="export-buttons">
+          <button class="btn small" id="exportJson" type="button" title="Download a .json file you can import into TutMesh">{ } JSON</button>
+          <button class="btn small" id="exportPdf" type="button" title="Download a printable PDF with a streak tracker">PDF</button>
+          <button class="btn small primary" id="openTutmesh" type="button" title="Track this roadmap in TutMesh">Open in TutMesh →</button>
+        </div>
+      </div>
+    </div>
+    <div class="rm-stats" id="rmStats"></div>
+    <div class="rm-goal" id="rmGoal">
+      <p class="hint">Play videos and preview articles right here: <strong><span data-goal="video">10</span> min of video or <span data-goal="read">5</span> min of reading a day</strong> keeps your streak (tracked automatically, in this browser only).</p>
+    </div>
+    <div id="roadmap"></div>
+  </div>
+</section>
+
+<!-- HISTORY DRAWER -->
+<aside class="drawer" id="historyDrawer" hidden aria-label="Saved analyses">
+  <div class="drawer-head">
+    <h3>Saved in this browser</h3>
+    <button class="linklike" id="closeHistory" aria-label="Close history">Close</button>
+  </div>
+  <ul id="historyList" class="history"></ul>
+  <button class="btn danger" id="wipeBtn">Delete all local data</button>
+</aside>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'web/common.js' %}?v=4" defer></script>
+<script src="{% static 'web/media.js' %}?v=4" defer></script>
+<script src="{% static 'web/app.js' %}?v=4" defer></script>
+{% endblock %}

@@ -1,0 +1,23 @@
+{% extends "web/base.html" %}
+{% block title %}Privacy · SkillMesh AI{% endblock %}
+{% block content %}
+<article class="card prose">
+  <h1>Privacy</h1>
+  <p>SkillMesh is built so that we never need to keep your data.</p>
+  <h2>What happens to your resume</h2>
+  <ul>
+    <li>Your file is read <strong>in memory</strong> on our server to extract its text, then discarded. It is never written to disk or to a database.</li>
+    <li>If AI extraction is enabled, the text is sent to our AI provider (Anthropic) for analysis. Before sending, we remove email addresses, phone numbers, street addresses and social profile links.</li>
+    <li>We don't log request contents.</li>
+  </ul>
+  <h2>Job postings</h2>
+  <ul>
+    <li>Job URLs are fetched once to read the posting. We only read public pages, never pages that need a login.</li>
+    <li>Screenshots are read <strong>in your browser</strong> using on-device OCR. The image is never uploaded.</li>
+  </ul>
+  <h2>Your history</h2>
+  <p>Saved analyses and roadmap progress live only in this browser (local storage). You can delete them at any time with “Delete all local data” in the History panel.</p>
+  <h2>What we do store</h2>
+  <p>Only public data: our skill taxonomy and a cache of free learning resources (tutorials, playlists, docs) that we recommend.</p>
+</article>
+{% endblock %}

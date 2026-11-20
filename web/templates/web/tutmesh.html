@@ -1,0 +1,129 @@
+{% extends "web/base.html" %}
+{% load static %}
+{% block title %}TutMesh · SkillMesh AI{% endblock %}
+
+{% block nav %}
+  <a href="{% url 'index' %}">Analyzer</a>
+  <a href="{% url 'tutmesh' %}" aria-current="page">TutMesh</a>
+{% endblock %}
+
+{% block content %}
+<section class="tm-hero">
+  <div>
+    <span class="eyebrow">TutMesh</span>
+    <h1>Track your learning, keep your streak.</h1>
+    <p>Import a roadmap exported from SkillMesh. Your progress, notes and streak stay in this browser, and nothing is uploaded.</p>
+  </div>
+  <label class="dropzone tm-drop" id="importDrop" tabindex="0">
+    <input type="file" id="importFile" accept=".json,application/json" hidden>
+    <strong>Import roadmap (.json)</strong>
+    <span>Drop the file here or click to browse</span>
+  </label>
+</section>
+
+<div class="tm-layout">
+  <aside class="card tm-sidebar" aria-label="Your roadmaps">
+    <h3>Your roadmaps</h3>
+    <ul id="tmList" class="tm-list"></ul>
+    <p class="hint" id="tmEmptyList">No roadmaps yet. Import one, or use “Open in TutMesh” on the analyzer.</p>
+  </aside>
+
+  <section class="tm-main" id="tmMain" hidden>
+    <div class="card tm-overview">
+      <div class="ring-wrap small">
+        <svg viewBox="0 0 120 120" class="ring" aria-hidden="true">
+          <circle cx="60" cy="60" r="52" class="ring-bg"/>
+          <circle cx="60" cy="60" r="52" class="ring-fg" id="tmRing"/>
+        </svg>
+        <div class="ring-label"><span id="tmPct">0</span><small>% done</small></div>
+      </div>
+      <div class="tm-title">
+        <span class="eyebrow" id="tmEyebrow"></span>
+        <h2 id="tmJob"></h2>
+        <p id="tmMeta"></p>
+        <div class="tm-actions">
+          <button class="btn small" id="tmExportJson" type="button">Export JSON (with progress)</button>
+          <button class="btn small" id="tmExportPdf" type="button">Export PDF</button>
+          <button class="btn small danger-outline" id="tmDelete" type="button">Remove</button>
+        </div>
+      </div>
+      <div class="tm-streak">
+        <div class="streak-flame" aria-hidden="true">🔥</div>
+        <div><b id="tmStreak">0</b><span>day streak</span></div>
+        <div><b id="tmBest">0</b><span>best streak</span></div>
+        <div><b id="tmDays">0</b><span>streak days</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="tm-log-head">
+        <div>
+          <h3>Today's streak goal</h3>
+          <p class="hint">Tracked automatically. <strong>Watch <span data-goal="video">10</span> minutes</strong> in the video player <strong>or read <span data-goal="read">5</span> minutes</strong> in the content preview to earn today's streak day.
+            Time only counts inside SkillMesh: while a video is playing, or while an article is open in the preview and you're active.</p>
+        </div>
+        <button class="btn small" type="button" id="tmGoalEdit" aria-expanded="false" aria-controls="tmGoalForm">✎ Edit goal</button>
+      </div>
+      <form id="tmGoalForm" class="goal-edit" hidden>
+        <div class="goal-edit-head">
+          <strong>Daily goal</strong>
+          <span class="hint">Minutes you need for a streak day. The time itself can't be edited: it's only counted while you study here.</span>
+        </div>
+        <label>🎬 Watch (minutes) <input type="number" id="geGoalVideo" min="1" max="240" step="1" inputmode="numeric" required></label>
+        <label>📖 Read (minutes) <input type="number" id="geGoalRead" min="1" max="240" step="1" inputmode="numeric" required></label>
+        <div class="goal-edit-actions">
+          <button class="btn small primary" type="submit">Save goal</button>
+          <button class="btn small" type="button" id="geCancel">Cancel</button>
+          <button class="linklike" type="button" id="geReset">Reset to 10 / 5 min</button>
+        </div>
+      </form>
+      <div id="tmGoal"></div>
+      <h4 class="tm-sub">Study activity <span class="hint">past 12 months · minutes watched + read</span></h4>
+      <div class="activity">
+        <div class="activity-metrics">
+          <div class="metric">
+            <span class="metric-label">Total tracked</span>
+            <span class="metric-value"><b id="tmTotalMin">0</b><span>min</span></span>
+            <small id="tmTotalSplit"></small>
+          </div>
+          <div class="metric fire">
+            <span class="metric-label">Weekly streak</span>
+            <span class="metric-value"><b id="tmWeekStreak">0</b><span id="tmWeekUnit">weeks</span></span>
+            <small id="tmWeekDays"></small>
+          </div>
+        </div>
+        <div class="activity-chart">
+          <div class="heatmap" id="heatmap" role="img" aria-label="Study activity heatmap"></div>
+          <div class="heat-legend"><span>Less</span><i class="l0"></i><i class="l1"></i><i class="l2"></i><i class="l3"></i><i class="l4"></i><span>More</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card roadmap-card">
+      <div class="roadmap-head">
+        <div>
+          <span class="eyebrow">Roadmap</span>
+          <h3>Steps</h3>
+        </div>
+        <div class="steps-tools">
+          <div id="tmDiffFilter"></div>
+          <label class="switch compact">
+            <input type="checkbox" id="hideDone">
+            <span class="switch-track" aria-hidden="true"><span class="switch-thumb"></span></span>
+            <span class="switch-text"><b>Hide completed</b><small id="hideDoneCount"></small></span>
+          </label>
+        </div>
+      </div>
+      <div id="tmRoadmap"></div>
+    </div>
+  </section>
+</div>
+
+<div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'web/common.js' %}?v=4" defer></script>
+<script src="{% static 'web/media.js' %}?v=4" defer></script>
+<script src="{% static 'web/tutmesh.js' %}?v=4" defer></script>
+{% endblock %}

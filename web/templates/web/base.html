@@ -1,0 +1,32 @@
+{% load static %}<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}SkillMesh AI{% endblock %}</title>
+  <meta name="description" content="Check how well your resume fits a job, and get a free learning roadmap for the gaps.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='14' fill='%234f46e5'/><path d='M9 16h14M16 9v14' stroke='white' stroke-width='3'/></svg>">
+  <meta name="color-scheme" content="light dark">
+  <script src="{% static 'web/theme.js' %}"></script>
+  <link rel="stylesheet" href="{% static 'web/app.css' %}?v=4">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="{% url 'index' %}"><span class="logo" aria-hidden="true"></span>SkillMesh <span class="brand-ai">AI</span></a>
+    <nav class="topnav">
+      {% block nav %}{% endblock %}
+      <a href="{% url 'privacy' %}">Privacy</a>
+      <button type="button" class="theme-toggle" id="themeToggle" aria-label="Switch to dark mode">
+        <span class="ti-sun" aria-hidden="true">☀️</span><span class="ti-moon" aria-hidden="true">🌙</span>
+      </button>
+    </nav>
+  </header>
+  <main class="container">
+    {% block content %}{% endblock %}
+  </main>
+  <footer class="footer">
+    <p>Your resume and job data are processed in memory and never stored on our servers. History is kept only in this browser.</p>
+  </footer>
+  {% block scripts %}{% endblock %}
+</body>
+</html>
