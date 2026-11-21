@@ -86,6 +86,7 @@ DATABASES = {
         default=os.getenv("DATABASE_URL", ""),
         conn_max_age=600,
         ssl_require=not DEBUG,
+        options={"options": "-c statement_timeout=30000"},
     )
 }
 
@@ -107,6 +108,7 @@ USE_TZ = True
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_DIRS = [BASE_DIR / "web" / "static"]
+WHITENOISE_USE_FINDERS = True 
 # Use default storage - WhiteNoise handles compression via middleware
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
