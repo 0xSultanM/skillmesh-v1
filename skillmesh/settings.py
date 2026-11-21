@@ -81,14 +81,18 @@ WSGI_APPLICATION = "skillmesh.wsgi.application"
 # Set DATABASE_URL in Vercel environment variables:
 #   postgresql://USER:PASSWORD@HOST:PORT/DBNAME
 # Free options: Supabase, Neon, Railway, Aiven
+
 DATABASES = {
     "default": dj_database_url.config(
         default=os.getenv("DATABASE_URL", ""),
-        conn_max_age=600,
+        conn_max_age=0,
         ssl_require=not DEBUG,
-        options={"options": "-c statement_timeout=30000"},
     )
 }
+DATABASES["default"]["DISABLE_SERVER_SIDE_CURSORS"] = True
+DATABASES["default"].setdefault("OPTIONS", {})["options"] = "-c statement_timeout=30000"
+
+
 
 CACHES = {"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}}
 
