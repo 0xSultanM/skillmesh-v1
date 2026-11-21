@@ -107,11 +107,7 @@ USE_TZ = True
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_DIRS = [BASE_DIR / "web" / "static"]
-STORAGES = {
-    "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
-    },
-}
+# Use default storage - WhiteNoise handles compression via middleware
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # --- Sessions: kept in a signed, HttpOnly cookie, never in the database -----
