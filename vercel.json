@@ -1,5 +1,7 @@
 {
   "version": 2,
+  "buildCommand": "pip install -r requirements.txt && python manage.py collectstatic --noinput --clear && echo 'Build complete'",
+  "outputDirectory": "staticfiles",
   "builds": [
     {
       "src": "skillmesh/wsgi.py",
@@ -11,6 +13,10 @@
     }
   ],
   "routes": [
+    {
+      "src": "/static/(.*)",
+      "dest": "/static/$1"
+    },
     {
       "src": "/(.*)",
       "dest": "skillmesh/wsgi.py"
